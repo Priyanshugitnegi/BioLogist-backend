@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.log
+
+# Django secrets & database
+.env
+.env.*
+SECRET_KEY
+db.sqlite3
+media/
+staticfiles/
+
+# Virtual environments
+venv/
+env/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend (separate repo)
+frontend/
+
+# Data files
+*.xlsx
