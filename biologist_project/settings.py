@@ -89,7 +89,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # STATIC
 # ──────────────────────────────────────
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'public']   # React dev
+# STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'public']   # React dev
 STATIC_ROOT = BASE_DIR / 'staticfiles'                  # For production collectstatic
 
 # ──────────────────────────────────────
