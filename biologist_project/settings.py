@@ -1,16 +1,18 @@
 # backend/biologist_project/settings.py
 from pathlib import Path
 import os
+import dj_database_url   # ← NEW (needed for PostgreSQL on Render)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ──────────────────────────────────────
 # SECURITY
 # ──────────────────────────────────────
-SECRET_KEY = 'django-insecure-change-this-in-production-please!!'
-DEBUG = True  # ← Set to False in production!
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-change-this-in-production-please!!")
 
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get("DEBUG", "True") == "True"
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
 # ──────────────────────────────────────
 # INSTALLED APPS
@@ -33,11 +35,15 @@ INSTALLED_APPS = [
 ]
 
 # ──────────────────────────────────────
-# MIDDLEWARE (CORS FIRST!)
+# MIDDLEWARE
 # ──────────────────────────────────────
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',        # ← MUST BE FIRST
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+
+    # ← SECURITY REQUIRED FOR RENDER STATIC
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -54,7 +60,7 @@ ROOT_URLCONF = 'biologist_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # ← Your React build goes here
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -70,17 +76,22 @@ TEMPLATES = [
 WSGI_APPLICATION = 'biologist_project.wsgi.application'
 
 # ──────────────────────────────────────
-# DATABASE
+# DATABASE (SQLite locally, PostgreSQL on Render)
 # ──────────────────────────────────────
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.parse(os.environ["DATABASE_URL"], conn_max_age=600)
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # ──────────────────────────────────────
-# MEDIA (Product images)
+# MEDIA
 # ──────────────────────────────────────
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -88,28 +99,29 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # ──────────────────────────────────────
 # STATIC
 # ──────────────────────────────────────
-STATIC_URL = '/static/'
-# STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'public']   # React dev
-STATIC_ROOT = BASE_DIR / 'staticfiles'                  # For production collectstatic
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# ← Required for Render static file hosting
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ──────────────────────────────────────
-# REST + CORS
+# CORS
 # ──────────────────────────────────────
-REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.AllowAny'],  # ← Safe for public store
-}
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
 
+# Allow Render frontend if needed:
+CORS_ALLOW_ALL_ORIGINS = True  # ← OPTIONAL for debugging
+
 # ──────────────────────────────────────
 # DEFAULTS
 # ──────────────────────────────────────
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'Asia/Kolkata'      # ← Changed to India time
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
