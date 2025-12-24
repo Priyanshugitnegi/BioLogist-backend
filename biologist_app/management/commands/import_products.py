@@ -1,6 +1,6 @@
 import pandas as pd
 from django.core.management.base import BaseCommand
-from biologist_app.models import Product, Variant
+from biologist_app.models import Product, ProductVariant
 
 class Command(BaseCommand):
     help = "Import products and variants from Excel file"
@@ -52,13 +52,13 @@ class Command(BaseCommand):
 
             # CREATE VARIANT
             if variant_name:
-                Variant.objects.create(
+                ProductVariant.objects.create(
                     product=product,
                     name=variant_name,
                     price=price if price else 0,
                     stock=stock if stock else 0,
                 )
-                
+
                 self.stdout.write(f"   ➕ Added variant: {variant_name}")
 
         self.stdout.write(self.style.SUCCESS("✅ Import completed!"))
