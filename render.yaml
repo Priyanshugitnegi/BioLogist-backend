@@ -2,6 +2,10 @@ services:
   - type: web
     name: biologist-backend
     env: python
+
+    # Important: set backend folder as working directory
+    rootDirectory: BioLogist-backend
+
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
     startCommand: "gunicorn biologist_project.wsgi:application"
 
@@ -19,7 +23,7 @@ services:
         value: "*"
 
       - key: PYTHON_VERSION
-        value: 3.11
+        value: "3.11"
 
       - key: DATABASE_URL
         fromDatabase:
@@ -29,4 +33,3 @@ services:
 databases:
   - name: biologist-db
     plan: free
-
