@@ -5,6 +5,7 @@ from .views import (
     TeamMemberViewSet,
     CategoryViewSet,
     EnquiryCreateView,
+    ProductDetailBySlug,   # ✅ ADD THIS
     home,
 )
 
@@ -18,12 +19,18 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("api/enquiry/", EnquiryCreateView.as_view()),
 
+    # 🔥 SLUG-BASED PRODUCT DETAIL API
+    path("api/products/slug/<slug:slug>/", ProductDetailBySlug.as_view()),
+
     # ================= REACT =================
     path("", home),
     path("products/", home),
-    path("product/<int:pk>/", home),
+
+    # 🔥 FIX: slug instead of int:pk
+    path("product/<slug:slug>/", home),
+
     path("contact/", home),
 
-    # Catch-all
+    # Catch-all (keep last)
     path("<path:path>/", home),
 ]

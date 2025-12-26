@@ -19,17 +19,21 @@ from .serializers import (
 )
 
 
+# =========================
+# REACT ENTRY
+# =========================
 def home(request, *args, **kwargs):
     return render(request, "home.html")
 
 
 # =========================
-# PRODUCTS
+# PRODUCTS (LIST + ID DETAIL)
 # =========================
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductSerializer
 
     def get_queryset(self):
+        # Product LIST (grouped by name)
         if self.action == "list":
             grouped_ids = (
                 Product.objects
@@ -46,6 +50,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 .order_by("name")
             )
 
+        # Product DETAIL (by ID)
         return (
             Product.objects
             .select_related("category", "subcategory")
@@ -60,6 +65,21 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
             pk=pk
         )
         serializer = self.get_serializer(product)
+        return Response(serializer.data)
+
+
+# =========================
+# PRODUCT DETAIL (BY SLUG) ✅ FIX FOR FRONTEND
+# =========================
+class ProductDetailBySlug(APIView):
+    def get(self, request, slug):
+        product = get_object_or_404(
+            Product.objects
+            .select_related("category", "subcategory")
+            .prefetch_related("variants"),
+            slug=slug
+        )
+        serializer = ProductSerializer(product)
         return Response(serializer.data)
 
 
@@ -86,7 +106,7 @@ class TeamMemberViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # =========================
-# ENQUIRY API  ✅ THIS SAVES DATA
+# ENQUIRY API
 # =========================
 class EnquiryCreateView(APIView):
     def post(self, request):
