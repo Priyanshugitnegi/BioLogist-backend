@@ -1,9 +1,13 @@
+# ===============================
 # Python
+# ===============================
 __pycache__/
 *.py[cod]
 *.log
 
+# ===============================
 # Django secrets & database
+# ===============================
 .env
 .env.*
 SECRET_KEY
@@ -11,16 +15,25 @@ db.sqlite3
 media/
 staticfiles/
 
+# ===============================
 # Virtual environments
+# ===============================
 venv/
 env/
 
-# OS
+# ===============================
+# OS files
+# ===============================
 .DS_Store
 Thumbs.db
 
+# ===============================
 # Frontend (separate repo)
+# ===============================
 frontend/
 
+# ===============================
 # Data files
-*.xlsx
+# ===============================
+# ❌ DO NOT ignore Excel (needed for Render import)
+# *.xlsx
