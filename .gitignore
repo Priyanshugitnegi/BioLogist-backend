@@ -35,5 +35,6 @@ frontend/
 # ===============================
 # Data files
 # ===============================
-# ❌ DO NOT ignore Excel (needed for Render import)
-# *.xlsx
+# ❗ Excel files are REQUIRED for Render import
+# DO NOT ignore .xlsx
+# *.xlsx   ❌ (intentionally commented)
