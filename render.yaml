@@ -11,10 +11,11 @@ services:
       python manage.py collectstatic --noinput
 
     startCommand: >
-      python manage.py makemigrations &&
-      python manage.py migrate --noinput &&
+      python manage.py makemigrations biologist_app &&
+       python manage.py migrate --run-syncdb &&
       python manage.py import_products --file data/product_7.xlsx &&
       gunicorn biologist_project.wsgi:application
+
 
 
     envVars:
