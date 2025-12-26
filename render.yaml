@@ -6,7 +6,10 @@ services:
     rootDirectory: BioLogist-backend
 
     buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput"
-    startCommand: "python manage.py migrate && python manage.py import_products --file data/product_7.xlsx && gunicorn biologist_project.wsgi:application"
+    startCommand: >
+        python manage.py migrate &&
+        python manage.py import_products --file ./data/product_7.xlsx &&
+        gunicorn biologist_project.wsgi:application
 
     envVars:
       - key: DJANGO_SETTINGS_MODULE
