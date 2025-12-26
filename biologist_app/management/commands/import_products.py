@@ -1,3 +1,5 @@
+raise RuntimeError("IMPORT_PRODUCTS COMMAND WAS EXECUTED")
+
 import pandas as pd
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
