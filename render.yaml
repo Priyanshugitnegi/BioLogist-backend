@@ -2,15 +2,18 @@ services:
   - type: web
     name: biologist-backend
     env: python
+    plan: free
 
-    buildCommand: >
-      pip install -r requirements.txt &&
+    rootDirectory: BioLogist-backend
+
+    buildCommand: |
+      pip install -r requirements.txt
       python manage.py collectstatic --noinput
 
-    startCommand: >
-      python manage.py migrate &&
-      python manage.py import_products --file data/product_7.xlsx &&
-      gunicorn biologist_project.wsgi:application
+    startCommand: |
+      python manage.py migrate --noinput
+      python manage.py import_products --file data/product_7.xlsx
+      gunicorn biologist_project.wsgi:application --bind 0.0.0.0:10000
 
     envVars:
       - key: DJANGO_SETTINGS_MODULE
@@ -21,8 +24,6 @@ services:
         value: "False"
       - key: ALLOWED_HOSTS
         value: "*"
-      - key: PYTHON_VERSION
-        value: "3.11"
       - key: DATABASE_URL
         fromDatabase:
           name: biologist-db
