@@ -81,7 +81,7 @@ class Product(models.Model):
 
 
 # ==============================
-# PRODUCT VARIANT (REAL SKU)
+# PRODUCT VARIANT
 # ==============================
 class ProductVariant(models.Model):
     product = models.ForeignKey(
@@ -90,14 +90,13 @@ class ProductVariant(models.Model):
         on_delete=models.CASCADE
     )
 
-    # 🔥 Real catalog number
     catalog_number = models.CharField(
         max_length=50,
         unique=True
     )
 
-    quantity = models.DecimalField(max_digits=10, decimal_places=2)
-    unit = models.CharField(max_length=20)
+    quantity = models.CharField(max_length=50)
+    unit = models.CharField(max_length=20, blank=True)
 
     price = models.DecimalField(
         max_digits=12,
@@ -111,15 +110,12 @@ class ProductVariant(models.Model):
     class Meta:
         ordering = ["quantity"]
 
-    def display_label(self):
-        return f"{self.quantity:g} {self.unit}"
-
     def __str__(self):
         return f"{self.product.name} [{self.catalog_number}]"
 
 
 # ==============================
-# ENQUIRY  ✅ NEW
+# ENQUIRY  ✅
 # ==============================
 class Enquiry(models.Model):
     product = models.ForeignKey(
@@ -137,7 +133,6 @@ class Enquiry(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()
     phone = models.CharField(max_length=20, blank=True)
-
     message = models.TextField(blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -150,7 +145,7 @@ class Enquiry(models.Model):
 
 
 # ==============================
-# TEAM MEMBER
+# TEAM MEMBER  ✅
 # ==============================
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)

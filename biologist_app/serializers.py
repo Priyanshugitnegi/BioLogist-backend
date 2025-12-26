@@ -22,7 +22,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
 
 
 # =========================
-# CATEGORY SERIALIZER  ✅ FIXED
+# CATEGORY SERIALIZER
 # =========================
 class CategorySerializer(serializers.ModelSerializer):
     product_count = serializers.IntegerField(read_only=True)
@@ -40,7 +40,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 # =========================
-# PRODUCT VARIANT SERIALIZER
+# PRODUCT VARIANT SERIALIZER ✅ FIXED
 # =========================
 class ProductVariantSerializer(serializers.ModelSerializer):
     display_label = serializers.SerializerMethodField()
@@ -58,7 +58,10 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         ]
 
     def get_display_label(self, obj):
-        return f"{obj.quantity:g} {obj.unit}"
+        # quantity is now a STRING, not a number
+        if obj.unit:
+            return f"{obj.quantity} {obj.unit}"
+        return obj.quantity
 
 
 # =========================

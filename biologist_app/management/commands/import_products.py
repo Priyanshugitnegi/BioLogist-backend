@@ -1,7 +1,12 @@
 import pandas as pd
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
+
 from biologist_app.models import (
-    Category, SubCategory, Product, ProductVariant
+    Category,
+    SubCategory,
+    Product,
+    ProductVariant,
 )
 
 
@@ -9,16 +14,16 @@ class Command(BaseCommand):
     help = "Import categories, subcategories, products & variants from Excel file"
 
     def add_arguments(self, parser):
-        parser.add_argument("--file", type=str, help="Path to Excel file")
+        parser.add_argument(
+            "--file",
+            type=str,
+            required=True,
+            help="Path to Excel file"
+        )
 
     def handle(self, *args, **options):
         file_path = options["file"]
-
-        if not file_path:
-            self.stdout.write(self.style.ERROR("❌ Please provide --file argument"))
-            return
-
-        self.stdout.write(f"\n📄 Reading Excel: {file_path}\n")
+        self.stdout.write(self.style.NOTICE(f"\n📄 Reading Excel: {file_path}\n"))
 
         try:
             df = pd.read_excel(file_path)
@@ -26,78 +31,89 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"❌ Error reading file: {e}"))
             return
 
-        for index, row in df.iterrows():
+        created_products = 0
+        created_variants = 0
 
-            # --- CLEAN VALUES ---
-            product_name = str(row.get("product_name", "")).strip()
+        for _, row in df.iterrows():
+
+            # ============================
+            # CLEAN VALUES (EXACT EXCEL)
+            # ============================
+            product_name = str(row.get("Product name", "")).strip()
             category_name = str(row.get("category", "")).strip()
             subcategory_name = str(row.get("subcategory", "")).strip()
-            description = str(row.get("description", "")).strip()
 
-            variant_catalog = str(row.get("catalog_number", "")).strip()
-            quantity = row.get("quantity", None)
-            unit = str(row.get("unit", "")).strip()
-            price = row.get("price", None)
+            variant_catalog = str(row.get("Catalog no", "")).strip()
+            quantity = str(row.get("quantity", "")).strip()
 
-            if not product_name:
-                self.stdout.write(self.style.WARNING(f"⚠️ Row {index} skipped (no product_name)"))
+            raw_price = str(row.get("price", "")).strip()
+            price = float(raw_price) if raw_price.replace(".", "", 1).isdigit() else None
+
+            if not product_name or not category_name:
                 continue
 
-            # --- FIX "nan" values ---
-            if category_name.lower() == "nan": category_name = ""
-            if subcategory_name.lower() == "nan": subcategory_name = ""
-            if description.lower() == "nan": description = ""
+            # ============================
+            # CATEGORY (SAFE SLUG LOGIC)
+            # ============================
+            category = Category.objects.filter(name=category_name).first()
 
-            # --- CATEGORY ---
-            category_obj = None
-            if category_name:
-                category_obj, _ = Category.objects.get_or_create(
+            if not category:
+                base_slug = slugify(category_name)
+                slug = base_slug
+                counter = 1
+
+                while Category.objects.filter(slug=slug).exists():
+                    slug = f"{base_slug}-{counter}"
+                    counter += 1
+
+                category = Category.objects.create(
                     name=category_name,
-                    defaults={"slug": category_name.lower().replace(" ", "-")}
+                    slug=slug
                 )
 
-            # --- SUBCATEGORY ---
-            subcategory_obj = None
-            if subcategory_name and category_obj:
-                subcategory_obj, _ = SubCategory.objects.get_or_create(
-                    category=category_obj,
+            # ============================
+            # SUBCATEGORY
+            # ============================
+            subcategory = None
+            if subcategory_name:
+                subcategory, _ = SubCategory.objects.get_or_create(
+                    category=category,
                     name=subcategory_name
                 )
 
-            # --- PRODUCT ---
+            # ============================
+            # PRODUCT
+            # ============================
             product, created = Product.objects.get_or_create(
                 name=product_name,
                 defaults={
-                    "category": category_obj,
-                    "subcategory": subcategory_obj,
-                    "description": description,
+                    "category": category,
+                    "subcategory": subcategory,
                 }
             )
 
             if created:
-                self.stdout.write(self.style.SUCCESS(f"🆕 Added product: {product_name}"))
-            else:
-                # Update category or subcategory if needed
-                if product.category != category_obj:
-                    product.category = category_obj
-                if subcategory_obj and product.subcategory != subcategory_obj:
-                    product.subcategory = subcategory_obj
-                if description:
-                    product.description = description
-                product.save()
-                self.stdout.write(f"➡️ Updated product: {product_name}")
+                created_products += 1
 
-            # --- VARIANT ---
+            # ============================
+            # VARIANT
+            # ============================
             if variant_catalog:
-                ProductVariant.objects.update_or_create(
+                variant, variant_created = ProductVariant.objects.update_or_create(
                     catalog_number=variant_catalog,
                     defaults={
                         "product": product,
-                        "quantity": quantity if quantity else 0,
-                        "unit": unit,
-                        "price": price if price else 0,
+                        "quantity": quantity,
+                        "unit": "",
+                        "price": price,
                     }
                 )
-                self.stdout.write(f"   ➕ Variant: {variant_catalog}")
 
-        self.stdout.write(self.style.SUCCESS("\n✅ Import completed successfully!\n"))
+                if variant_created:
+                    created_variants += 1
+
+        self.stdout.write(self.style.SUCCESS(
+            f"\n✅ Import complete!"
+            f"\n   🆕 Products created: {created_products}"
+            f"\n   ➕ Variants created: {created_variants}\n"
+        ))
