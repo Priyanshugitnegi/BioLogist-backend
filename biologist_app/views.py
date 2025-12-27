@@ -1,6 +1,9 @@
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
+
 from django.db.models import Min, Count
 from django.shortcuts import get_object_or_404, render
 
@@ -27,35 +30,36 @@ def home(request, *args, **kwargs):
 
 
 # =========================
-# PRODUCTS (LIST + ID DETAIL)
+# PRODUCTS (LIST + DETAIL)
 # =========================
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductSerializer
 
+    # 🔍 SEARCH + FILTER
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ["name"]
+    filterset_fields = ["category", "subcategory"]
+
     def get_queryset(self):
-        # Product LIST (grouped by name)
+        base_qs = (
+            Product.objects
+            .select_related("category", "subcategory")
+            .prefetch_related("variants")
+            .order_by("name")
+        )
+
+        # LIST → group by product name
         if self.action == "list":
             grouped_ids = (
-                Product.objects
+                base_qs
                 .values("name")
                 .annotate(first_id=Min("id"))
                 .values_list("first_id", flat=True)
             )
+            return base_qs.filter(id__in=grouped_ids)
 
-            return (
-                Product.objects
-                .filter(id__in=grouped_ids)
-                .select_related("category", "subcategory")
-                .prefetch_related("variants")
-                .order_by("name")
-            )
-
-        # Product DETAIL (by ID)
-        return (
-            Product.objects
-            .select_related("category", "subcategory")
-            .prefetch_related("variants")
-        )
+        # DETAIL
+        return base_qs
 
     def retrieve(self, request, pk=None):
         product = get_object_or_404(
@@ -69,7 +73,7 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # =========================
-# PRODUCT DETAIL (BY SLUG) ✅ FIX FOR FRONTEND
+# PRODUCT DETAIL (BY SLUG)
 # =========================
 class ProductDetailBySlug(APIView):
     def get(self, request, slug):
