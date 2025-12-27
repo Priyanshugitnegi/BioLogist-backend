@@ -1,15 +1,27 @@
-# biologist_project/urls.py
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from rest_framework.routers import DefaultRouter
+from biologist_app.views import (
+    ProductViewSet,
+    CategoryViewSet,
+    TeamMemberViewSet,
+    EnquiryCreateView,
+    ProductDetailBySlug,
+)
+
+router = DefaultRouter()
+router.register("products", ProductViewSet, basename="products")
+router.register("categories", CategoryViewSet, basename="categories")
+router.register("team", TeamMemberViewSet, basename="team")
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # 🔥 ALL ROUTES GO TO APP
-    path("", include("biologist_app.urls")),
+    # ✅ API v1
+    path("api/v1/", include(router.urls)),
+    path("api/v1/enquiry/", EnquiryCreateView.as_view()),
+    path(
+        "api/v1/products/slug/<slug:slug>/",
+        ProductDetailBySlug.as_view()
+    ),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
