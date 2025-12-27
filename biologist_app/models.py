@@ -81,7 +81,7 @@ class Product(models.Model):
 
 
 # ==============================
-# PRODUCT VARIANT
+# PRODUCT VARIANT  ✅ FIXED
 # ==============================
 class ProductVariant(models.Model):
     product = models.ForeignKey(
@@ -90,13 +90,15 @@ class ProductVariant(models.Model):
         on_delete=models.CASCADE
     )
 
+    # 🔥 FIXED LENGTH (was 50)
     catalog_number = models.CharField(
-        max_length=50,
+        max_length=255,
         unique=True
     )
 
-    quantity = models.CharField(max_length=50)
-    unit = models.CharField(max_length=20, blank=True)
+    # 🔥 FIXED LENGTHS
+    quantity = models.CharField(max_length=100)
+    unit = models.CharField(max_length=50, blank=True)
 
     price = models.DecimalField(
         max_digits=12,
@@ -115,7 +117,7 @@ class ProductVariant(models.Model):
 
 
 # ==============================
-# ENQUIRY  ✅
+# ENQUIRY
 # ==============================
 class Enquiry(models.Model):
     product = models.ForeignKey(
@@ -145,7 +147,7 @@ class Enquiry(models.Model):
 
 
 # ==============================
-# TEAM MEMBER  ✅
+# TEAM MEMBER
 # ==============================
 class TeamMember(models.Model):
     name = models.CharField(max_length=100)
