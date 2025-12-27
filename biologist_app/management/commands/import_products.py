@@ -8,7 +8,7 @@ from biologist_app.models import Category, SubCategory, Product, ProductVariant
 
 
 class Command(BaseCommand):
-    help = "Import products from Excel (FINAL, safe & idempotent)"
+    help = "Import products from Excel (FINAL & production-safe)"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -23,15 +23,6 @@ class Command(BaseCommand):
 
         self.stdout.write("🔥 STARTING EXCEL IMPORT COMMAND")
 
-        # ⛔ PREVENT DUPLICATE IMPORTS
-        if Product.objects.exists():
-            self.stdout.write(
-                self.style.WARNING(
-                    "⚠️ Products already exist. Skipping Excel import."
-                )
-            )
-            return
-
         # ❌ FAIL LOUD IF FILE MISSING
         if not os.path.exists(file_path):
             raise CommandError(f"❌ Excel file not found: {file_path}")
@@ -40,7 +31,7 @@ class Command(BaseCommand):
 
         df = pd.read_excel(file_path)
 
-        # Normalize columns
+        # Normalize column names
         df.columns = (
             df.columns.str.strip()
             .str.lower()
@@ -86,7 +77,7 @@ class Command(BaseCommand):
             if not product_name or not catalog_number:
                 continue
 
-            # ✅ CATEGORY (slug-safe)
+            # ───────── CATEGORY (slug-safe) ─────────
             category_slug = slugify(category_name or "Uncategorized")
 
             category, _ = Category.objects.get_or_create(
@@ -96,20 +87,19 @@ class Command(BaseCommand):
                 }
             )
 
-            # ✅ SUBCATEGORY (slug-safe)
-        subcategory = None
-        if subcategory_name:
-            subcategory, _ = SubCategory.objects.get_or_create(
-                name=subcategory_name,
-                category=category
-             )
+            # ───────── SUBCATEGORY (NO SLUG FIELD) ─────────
+            subcategory = None
+            if subcategory_name:
+                subcategory, _ = SubCategory.objects.get_or_create(
+                    name=subcategory_name,
+                    category=category
+                )
 
-
-            # PRODUCT
+            # ───────── PRODUCT (UNIQUE BY NAME + CATEGORY) ─────────
             product, created = Product.objects.get_or_create(
                 name=product_name,
+                category=category,
                 defaults={
-                    "category": category,
                     "subcategory": subcategory
                 }
             )
@@ -117,7 +107,7 @@ class Command(BaseCommand):
             if created:
                 created_products += 1
 
-            # VARIANT (idempotent)
+            # ───────── VARIANT (UNIQUE BY CATALOG NUMBER) ─────────
             _, v_created = ProductVariant.objects.update_or_create(
                 catalog_number=catalog_number,
                 defaults={
