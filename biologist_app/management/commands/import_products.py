@@ -19,7 +19,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options["file"]
 
-        # ⛔ PREVENT DOUBLE IMPORTS ON RENDER
+        self.stdout.write("🔥 STARTING EXCEL IMPORT COMMAND")
+
+        # ⛔ PREVENT DUPLICATE IMPORTS
         if Product.objects.exists():
             self.stdout.write(
                 self.style.WARNING(
@@ -28,7 +30,7 @@ class Command(BaseCommand):
             )
             return
 
-        # 🔥 FAIL LOUDLY IF FILE MISSING (CRITICAL FOR RENDER)
+        # ❌ FAIL LOUD IF FILE MISSING
         if not os.path.exists(file_path):
             raise CommandError(f"❌ Excel file not found: {file_path}")
 
@@ -36,7 +38,7 @@ class Command(BaseCommand):
 
         df = pd.read_excel(file_path)
 
-        # Normalize column names
+        # Normalize columns
         df.columns = (
             df.columns.str.strip()
             .str.lower()
@@ -82,12 +84,10 @@ class Command(BaseCommand):
             if not product_name or not catalog_number:
                 continue
 
-            # CATEGORY
             category, _ = Category.objects.get_or_create(
                 name=category_name or "Uncategorized"
             )
 
-            # SUBCATEGORY
             subcategory = None
             if subcategory_name:
                 subcategory, _ = SubCategory.objects.get_or_create(
@@ -95,7 +95,6 @@ class Command(BaseCommand):
                     category=category
                 )
 
-            # PRODUCT
             product, created = Product.objects.get_or_create(
                 name=product_name,
                 defaults={
@@ -107,8 +106,7 @@ class Command(BaseCommand):
             if created:
                 created_products += 1
 
-            # VARIANT (IDEMPOTENT)
-            variant, v_created = ProductVariant.objects.update_or_create(
+            _, v_created = ProductVariant.objects.update_or_create(
                 catalog_number=catalog_number,
                 defaults={
                     "product": product,
