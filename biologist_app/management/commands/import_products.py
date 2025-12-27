@@ -97,17 +97,13 @@ class Command(BaseCommand):
             )
 
             # ✅ SUBCATEGORY (slug-safe)
-            subcategory = None
-            if subcategory_name:
-                sub_slug = slugify(subcategory_name)
+        subcategory = None
+        if subcategory_name:
+            subcategory, _ = SubCategory.objects.get_or_create(
+                name=subcategory_name,
+                category=category
+             )
 
-                subcategory, _ = SubCategory.objects.get_or_create(
-                    slug=sub_slug,
-                    defaults={
-                        "name": subcategory_name,
-                        "category": category
-                    }
-                )
 
             # PRODUCT
             product, created = Product.objects.get_or_create(
