@@ -19,6 +19,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         file_path = options["file"]
 
+        # ⛔ PREVENT DOUBLE IMPORTS ON RENDER
+        if Product.objects.exists():
+            self.stdout.write(
+                self.style.WARNING(
+                    "⚠️ Products already exist. Skipping Excel import."
+                )
+            )
+            return
+
         # 🔥 FAIL LOUDLY IF FILE MISSING (CRITICAL FOR RENDER)
         if not os.path.exists(file_path):
             raise CommandError(f"❌ Excel file not found: {file_path}")
@@ -68,7 +77,6 @@ class Command(BaseCommand):
 
             quantity = clean(row.get("quantity"))
             unit = clean(row.get("unit")) or ""
-
             price = clean_price(row.get("price"))
 
             if not product_name or not catalog_number:

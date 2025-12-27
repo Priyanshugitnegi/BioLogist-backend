@@ -8,11 +8,11 @@ services:
 
     buildCommand: |
       pip install -r requirements.txt
+      python manage.py migrate
+      python manage.py import_products --file data/product_7.xlsx
       python manage.py collectstatic --noinput
 
-
-    startCommand: "python manage.py migrate && gunicorn biologist_project.wsgi:application"
-
+    startCommand: gunicorn biologist_project.wsgi:application
 
     envVars:
       - key: DJANGO_SETTINGS_MODULE
