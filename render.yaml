@@ -4,8 +4,6 @@ services:
     env: python
     plan: free
 
-    rootDirectory: BioLogist-backend
-
     buildCommand: |
       pip install -r requirements.txt
       python manage.py migrate
