@@ -17,11 +17,11 @@ router.register("team", TeamMemberViewSet, basename="team")
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # ✅ API v1
+    # ✅ API (backend)
     path("api/v1/", include(router.urls)),
     path("api/v1/enquiry/", EnquiryCreateView.as_view()),
-    path(
-        "api/v1/products/slug/<slug:slug>/",
-        ProductDetailBySlug.as_view()
-    ),
+    path("api/v1/products/slug/<slug:slug>/", ProductDetailBySlug.as_view()),
+
+    # ✅ FRONTEND (React / SPA)
+    path("", include("biologist_app.urls")),
 ]
