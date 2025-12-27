@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from decimal import Decimal, InvalidOperation
 from django.core.management.base import BaseCommand, CommandError
+from django.utils.text import slugify
+
 from biologist_app.models import Category, SubCategory, Product, ProductVariant
 
 
@@ -84,17 +86,30 @@ class Command(BaseCommand):
             if not product_name or not catalog_number:
                 continue
 
+            # ✅ CATEGORY (slug-safe)
+            category_slug = slugify(category_name or "Uncategorized")
+
             category, _ = Category.objects.get_or_create(
-                name=category_name or "Uncategorized"
+                slug=category_slug,
+                defaults={
+                    "name": category_name or "Uncategorized"
+                }
             )
 
+            # ✅ SUBCATEGORY (slug-safe)
             subcategory = None
             if subcategory_name:
+                sub_slug = slugify(subcategory_name)
+
                 subcategory, _ = SubCategory.objects.get_or_create(
-                    name=subcategory_name,
-                    category=category
+                    slug=sub_slug,
+                    defaults={
+                        "name": subcategory_name,
+                        "category": category
+                    }
                 )
 
+            # PRODUCT
             product, created = Product.objects.get_or_create(
                 name=product_name,
                 defaults={
@@ -106,6 +121,7 @@ class Command(BaseCommand):
             if created:
                 created_products += 1
 
+            # VARIANT (idempotent)
             _, v_created = ProductVariant.objects.update_or_create(
                 catalog_number=catalog_number,
                 defaults={
