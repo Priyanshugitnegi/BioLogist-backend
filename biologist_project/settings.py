@@ -1,4 +1,3 @@
-# backend/biologist_project/settings.py
 from pathlib import Path
 import os
 import dj_database_url
@@ -15,10 +14,17 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-    "api.biologistinfo.com,biologist-backend-1.onrender.com"
-).split(",")
+
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "api.biologistinfo.com",
+    "biologist-backend-1.onrender.com",
+]
+
+
+
 
 # ──────────────────────────────────────
 # INSTALLED APPS
@@ -82,18 +88,21 @@ WSGI_APPLICATION = "biologist_project.wsgi.application"
 # ──────────────────────────────────────
 # DATABASE
 # ──────────────────────────────────────
-DATABASES = {
-    "default": dj_database_url.parse(
-        os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True,
-    )
-} if os.environ.get("DATABASE_URL") else {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if os.environ.get("DATABASE_URL"):
+    DATABASES = {
+        "default": dj_database_url.parse(
+            os.environ["DATABASE_URL"],
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 # ──────────────────────────────────────
 # STATIC & MEDIA
@@ -108,7 +117,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ──────────────────────────────────────
-# CORS (PRODUCTION SAFE)
+# CORS
 # ──────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
     "https://bio-logist-frontend.vercel.app",
@@ -119,7 +128,7 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # ──────────────────────────────────────
-# CSRF (REQUIRED FOR HTTPS)
+# CSRF
 # ──────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = [
     "https://bio-logist-frontend.vercel.app",
@@ -138,7 +147,6 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS":
-        "rest_framework.pagination.PageNumberPagination",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
