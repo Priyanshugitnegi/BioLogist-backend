@@ -15,10 +15,7 @@ from .models import (
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = [
-            "id",
-            "name",
-        ]
+        fields = ["id", "name"]
 
 
 # =========================
@@ -40,7 +37,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 # =========================
-# PRODUCT VARIANT SERIALIZER ✅ FIXED
+# PRODUCT VARIANT SERIALIZER
 # =========================
 class ProductVariantSerializer(serializers.ModelSerializer):
     display_label = serializers.SerializerMethodField()
@@ -58,31 +55,25 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         ]
 
     def get_display_label(self, obj):
-        # quantity is now a STRING, not a number
         if obj.unit:
             return f"{obj.quantity} {obj.unit}"
         return obj.quantity
 
 
 # =========================
-# PRODUCT SERIALIZER
+# PRODUCT SERIALIZER (🔥 FIXED)
 # =========================
 class ProductSerializer(serializers.ModelSerializer):
     variants = ProductVariantSerializer(many=True, read_only=True)
 
-    category_name = serializers.CharField(
-        source="category.name",
-        read_only=True
-    )
-    category_slug = serializers.CharField(
-        source="category.slug",
-        read_only=True
+    category_name = serializers.CharField(source="category.name", read_only=True)
+    category_slug = serializers.CharField(source="category.slug", read_only=True)
+    subcategory_name = serializers.CharField(
+        source="subcategory.name", read_only=True
     )
 
-    subcategory_name = serializers.CharField(
-        source="subcategory.name",
-        read_only=True
-    )
+    # 🔥 CANONICAL PRODUCT CATALOG (DERIVED FROM VARIANTS)
+    catalog_number = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -90,6 +81,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "slug",
+            "catalog_number",   # ✅ ALWAYS PRESENT
             "description",
             "image",
             "category",
@@ -99,6 +91,19 @@ class ProductSerializer(serializers.ModelSerializer):
             "subcategory_name",
             "variants",
         ]
+
+    def get_catalog_number(self, obj):
+        variants = obj.variants.all()
+
+        if not variants.exists():
+            return None
+
+        default_variant = variants.filter(is_default=True).first()
+        return (
+            default_variant.catalog_number
+            if default_variant
+            else variants.first().catalog_number
+        )
 
 
 # =========================
