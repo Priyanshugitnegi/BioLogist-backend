@@ -1,86 +1,101 @@
-# backend/biologist_project/settings.py
 from pathlib import Path
 import os
-import dj_database_url   # ← NEW (needed for PostgreSQL on Render)
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # ──────────────────────────────────────
 # SECURITY
 # ──────────────────────────────────────
-SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-change-this-in-production-please!!")
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-change-this-in-production-please!!"
+)
 
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+
+
+ALLOWED_HOSTS = [
+    "api.biologistinfo.com",
+    "biologist-backend-1.onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
+
+
+
+
 
 # ──────────────────────────────────────
 # INSTALLED APPS
 # ──────────────────────────────────────
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
 
     # Third-party
-    'rest_framework',
-    'django_filters',
-    'corsheaders',
+    "rest_framework",
+    "django_filters",
+    "corsheaders",
 
     # Local
-    'biologist_app.apps.BiologistAppConfig',
+    "biologist_app.apps.BiologistAppConfig",
 ]
 
 # ──────────────────────────────────────
 # MIDDLEWARE
 # ──────────────────────────────────────
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 
-    # ← SECURITY REQUIRED FOR RENDER STATIC
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'biologist_project.urls'
+ROOT_URLCONF = "biologist_project.urls"
 
 # ──────────────────────────────────────
 # TEMPLATES
 # ──────────────────────────────────────
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'biologist_project.wsgi.application'
+WSGI_APPLICATION = "biologist_project.wsgi.application"
 
 # ──────────────────────────────────────
-# DATABASE (SQLite locally, PostgreSQL on Render)
+# DATABASE
 # ──────────────────────────────────────
 if os.environ.get("DATABASE_URL"):
     DATABASES = {
-        "default": dj_database_url.parse(os.environ["DATABASE_URL"], conn_max_age=600)
+        "default": dj_database_url.parse(
+            os.environ["DATABASE_URL"],
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
 else:
     DATABASES = {
@@ -91,30 +106,44 @@ else:
     }
 
 # ──────────────────────────────────────
-# MEDIA
-# ──────────────────────────────────────
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# ──────────────────────────────────────
-# STATIC
+# STATIC & MEDIA
 # ──────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = (
+    "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
 
-# ← Required for Render static file hosting
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # ──────────────────────────────────────
 # CORS
 # ──────────────────────────────────────
+# ──────────────────────────────────────
+# CORS
+# ──────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://biologistinfo.com",
+    "https://www.biologistinfo.com",
+    "https://bio-logist-frontend.vercel.app",
 ]
 
-# Allow Render frontend if needed:
-CORS_ALLOW_ALL_ORIGINS = True  # ← OPTIONAL for debugging
+CORS_ALLOW_CREDENTIALS = True
+
+
+# ──────────────────────────────────────
+# CSRF
+# ──────────────────────────────────────
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "https://bio-logist-frontend.vercel.app",
+    "https://biologistinfo.com",
+    "https://www.biologistinfo.com",
+]
+
 
 # ──────────────────────────────────────
 # DEFAULTS
