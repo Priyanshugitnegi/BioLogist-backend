@@ -12,16 +12,17 @@ SECRET_KEY = os.environ.get(
     "django-insecure-change-this-in-production-please!!"
 )
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = True
 
 
 
 ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
     "api.biologistinfo.com",
     "biologist-backend-1.onrender.com",
+    "localhost",
+    "127.0.0.1",
 ]
+
 
 
 
@@ -119,22 +120,30 @@ MEDIA_ROOT = BASE_DIR / "media"
 # ──────────────────────────────────────
 # CORS
 # ──────────────────────────────────────
+# ──────────────────────────────────────
+# CORS
+# ──────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
-    "https://bio-logist-frontend.vercel.app",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
     "https://biologistinfo.com",
     "https://www.biologistinfo.com",
+    "https://bio-logist-frontend.vercel.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
 
 # ──────────────────────────────────────
 # CSRF
 # ──────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
     "https://bio-logist-frontend.vercel.app",
     "https://biologistinfo.com",
     "https://www.biologistinfo.com",
 ]
+
 
 # ──────────────────────────────────────
 # DEFAULTS
