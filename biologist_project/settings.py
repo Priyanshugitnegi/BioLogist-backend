@@ -117,6 +117,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 # ──────────────────────────────────────
 # ✅ CORS (FINAL + PREFLIGHT SAFE)
 # ──────────────────────────────────────
+CORS_URLS_REGEX = r"^/api/.*$"
+
+# TEMP SAFE DEBUG (no credentials)
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = False
 
