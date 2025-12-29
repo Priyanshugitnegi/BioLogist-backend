@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 import os
 import dj_database_url
 from corsheaders.defaults import default_headers
@@ -17,6 +18,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     "api.biologistinfo.com",
+    "www.biologistinfo.com",
+    "biologistinfo.com",
     "biologist-backend-1.onrender.com",
     "localhost",
     "127.0.0.1",
@@ -43,11 +46,10 @@ INSTALLED_APPS = [
 ]
 
 # ──────────────────────────────────────
-# MIDDLEWARE (ORDER IS CRITICAL)
+# MIDDLEWARE (ORDER MATTERS)
 # ──────────────────────────────────────
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # ✅ MUST BE FIRST
-
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
@@ -115,13 +117,12 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ──────────────────────────────────────
-# ✅ CORS (FINAL + PREFLIGHT SAFE)
+# CORS (FIXED FOR JWT)
 # ──────────────────────────────────────
 CORS_URLS_REGEX = r"^/api/.*$"
 
-# TEMP SAFE DEBUG (no credentials)
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_CREDENTIALS = True   # 🔥 REQUIRED FOR AUTH
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "authorization",
@@ -146,7 +147,7 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # ──────────────────────────────────────
-# DEFAULTS
+# INTERNATIONALIZATION
 # ──────────────────────────────────────
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
@@ -155,7 +156,19 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ──────────────────────────────────────
+# REST FRAMEWORK + JWT
+# ──────────────────────────────────────
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "AUTH_HEADER_TYPES": ("Bearer",),
 }
