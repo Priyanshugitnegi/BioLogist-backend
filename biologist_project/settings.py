@@ -12,9 +12,8 @@ SECRET_KEY = os.environ.get(
     "django-insecure-change-this-in-production-please!!"
 )
 
-DEBUG = True
-
-
+# ✅ PRODUCTION
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "api.biologistinfo.com",
@@ -22,10 +21,6 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
 ]
-
-
-
-
 
 # ──────────────────────────────────────
 # INSTALLED APPS
@@ -48,10 +43,12 @@ INSTALLED_APPS = [
 ]
 
 # ──────────────────────────────────────
-# MIDDLEWARE
+# ✅ MIDDLEWARE (CORS FIXED — VERY IMPORTANT)
 # ──────────────────────────────────────
 MIDDLEWARE = [
+    # ✅ MUST BE FIRST
     "corsheaders.middleware.CorsMiddleware",
+
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
 
@@ -110,6 +107,7 @@ else:
 # ──────────────────────────────────────
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
 STATICFILES_STORAGE = (
     "whitenoise.storage.CompressedManifestStaticFilesStorage"
 )
@@ -118,32 +116,24 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ──────────────────────────────────────
-# CORS
-# ──────────────────────────────────────
-# ──────────────────────────────────────
-# CORS
+# ✅ CORS (PRODUCTION READY)
 # ──────────────────────────────────────
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "https://bio-logist-frontend.vercel.app",
     "https://biologistinfo.com",
     "https://www.biologistinfo.com",
-    "https://bio-logist-frontend.vercel.app",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 
-
 # ──────────────────────────────────────
-# CSRF
+# ✅ CSRF (PRODUCTION READY)
 # ──────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
     "https://bio-logist-frontend.vercel.app",
     "https://biologistinfo.com",
     "https://www.biologistinfo.com",
 ]
-
 
 # ──────────────────────────────────────
 # DEFAULTS
