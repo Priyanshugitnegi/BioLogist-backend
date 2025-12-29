@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import dj_database_url
+from corsheaders.defaults import default_headers
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -12,7 +13,6 @@ SECRET_KEY = os.environ.get(
     "django-insecure-change-this-in-production-please!!"
 )
 
-# ✅ PRODUCTION
 DEBUG = False
 
 ALLOWED_HOSTS = [
@@ -43,11 +43,10 @@ INSTALLED_APPS = [
 ]
 
 # ──────────────────────────────────────
-# ✅ MIDDLEWARE (CORS FIXED — VERY IMPORTANT)
+# MIDDLEWARE (ORDER IS CRITICAL)
 # ──────────────────────────────────────
 MIDDLEWARE = [
-    # ✅ MUST BE FIRST
-    "corsheaders.middleware.CorsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # ✅ MUST BE FIRST
 
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -116,8 +115,10 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ──────────────────────────────────────
-# ✅ CORS (PRODUCTION READY)
+# ✅ CORS (FINAL + PREFLIGHT SAFE)
 # ──────────────────────────────────────
+CORS_ALLOW_ALL_ORIGINS = False
+
 CORS_ALLOWED_ORIGINS = [
     "https://bio-logist-frontend.vercel.app",
     "https://biologistinfo.com",
@@ -126,8 +127,23 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+# 🔥 ALLOW PREFLIGHT HEADERS
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "authorization",
+]
+
+# 🔥 ALLOW PREFLIGHT METHODS
+CORS_ALLOW_METHODS = [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+]
+
 # ──────────────────────────────────────
-# ✅ CSRF (PRODUCTION READY)
+# CSRF
 # ──────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = [
     "https://bio-logist-frontend.vercel.app",
