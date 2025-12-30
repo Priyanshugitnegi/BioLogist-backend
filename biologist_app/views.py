@@ -128,8 +128,6 @@ class TeamMemberViewSet(viewsets.ReadOnlyModelViewSet):
 # ENQUIRY API
 # =========================
 class EnquiryCreateView(APIView):
-    permission_classes = [permissions.AllowAny]
-
     def post(self, request):
         serializer = EnquirySerializer(data=request.data)
         if serializer.is_valid():

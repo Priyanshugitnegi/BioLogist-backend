@@ -127,3 +127,7 @@ class EnquirySerializer(serializers.ModelSerializer):
     class Meta:
         model = Enquiry
         fields = "__all__"
+        extra_kwargs = {
+            "product": {"required": False, "allow_null": True},
+            "variant": {"required": False, "allow_null": True},
+        }
