@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     # Third-party
     "rest_framework",
+    "rest_framework.authtoken",   # ✅ added (safe & useful)
     "django_filters",
     "corsheaders",
 
@@ -117,12 +118,12 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ──────────────────────────────────────
-# CORS (FIXED FOR JWT)
+# CORS (JWT + REACT SAFE)
 # ──────────────────────────────────────
 CORS_URLS_REGEX = r"^/api/.*$"
 
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True   # 🔥 REQUIRED FOR AUTH
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "authorization",
@@ -138,7 +139,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 # ──────────────────────────────────────
-# CSRF
+# CSRF (ONLY FOR ADMIN / FORMS)
 # ──────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = [
     "https://bio-logist-frontend.vercel.app",
@@ -163,6 +164,9 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",
+    ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
@@ -172,3 +176,8 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# ──────────────────────────────────────
+# RENDER HTTPS FIX
+# ──────────────────────────────────────
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

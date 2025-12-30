@@ -1,11 +1,12 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-from django.db.models import Count, Exists, OuterRef, Min, Case, When, IntegerField
+from django.db.models import Count, Exists, OuterRef, Case, When, IntegerField
 from django.shortcuts import get_object_or_404, render
+from django.contrib.auth.models import User
 
 from .models import (
     Product,
@@ -20,14 +21,23 @@ from .serializers import (
     TeamMemberSerializer,
     CategorySerializer,
     EnquirySerializer,
+    RegisterSerializer,   # ✅ ADD THIS
 )
-
 
 # =========================
 # REACT ENTRY
 # =========================
 def home(request, *args, **kwargs):
     return render(request, "home.html")
+
+
+# =========================
+# AUTH – REGISTER (CUSTOMER)
+# =========================
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = [permissions.AllowAny]   # 🔥 FIXES 403
 
 
 # =========================
@@ -48,7 +58,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         if self.action == "list":
-            # 🔥 annotate if product has variants
             qs = base_qs.annotate(
                 has_variants=Exists(
                     ProductVariant.objects.filter(product=OuterRef("pk"))
@@ -61,7 +70,6 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
                 )
             ).order_by("name", "priority", "id")
 
-            # ✅ pick ONE product per name (SQLite-safe)
             picked_ids = []
             seen = set()
 
@@ -79,6 +87,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
 # PRODUCT DETAIL (BY SLUG)
 # =========================
 class ProductDetailBySlug(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def get(self, request, slug):
         product = get_object_or_404(
             Product.objects
@@ -100,14 +110,10 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
         return (
             Category.objects
             .annotate(
-                product_count=Count(
-                    "products__name",   # 🔥 count UNIQUE product names
-                    distinct=True
-                )
+                product_count=Count("products__name", distinct=True)
             )
             .order_by("name")
         )
-
 
 
 # =========================
@@ -122,6 +128,8 @@ class TeamMemberViewSet(viewsets.ReadOnlyModelViewSet):
 # ENQUIRY API
 # =========================
 class EnquiryCreateView(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def post(self, request):
         serializer = EnquirySerializer(data=request.data)
         if serializer.is_valid():

@@ -1,9 +1,5 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
 
 from .views import (
     ProductViewSet,
@@ -11,6 +7,7 @@ from .views import (
     CategoryViewSet,
     EnquiryCreateView,
     ProductDetailBySlug,
+    RegisterView,
     home,
 )
 
@@ -24,11 +21,10 @@ urlpatterns = [
     path("api/", include(router.urls)),
     path("api/enquiry/", EnquiryCreateView.as_view()),
 
-    # ================= AUTH (JWT) =================
-    path("api/auth/login/", TokenObtainPairView.as_view(), name="jwt_login"),
-    path("api/auth/refresh/", TokenRefreshView.as_view(), name="jwt_refresh"),
+    # ================= AUTH (CUSTOMER) =================
+    path("api/auth/register/", RegisterView.as_view(), name="register"),
 
-    # 🔥 SLUG-BASED PRODUCT DETAIL API
+    # ================= PRODUCTS =================
     path("api/products/slug/<slug:slug>/", ProductDetailBySlug.as_view()),
 
     # ================= REACT =================

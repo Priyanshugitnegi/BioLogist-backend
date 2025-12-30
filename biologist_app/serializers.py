@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
+
 from .models import (
     Product,
     ProductVariant,
@@ -7,6 +9,24 @@ from .models import (
     TeamMember,
     Enquiry,
 )
+
+
+# =========================
+# AUTH – REGISTER SERIALIZER
+# =========================
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password"]
+
+    def create(self, validated_data):
+        return User.objects.create_user(
+            username=validated_data["username"],
+            email=validated_data.get("email", ""),
+            password=validated_data["password"],
+        )
 
 
 # =========================
@@ -27,13 +47,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = [
-            "id",
-            "name",
-            "slug",
-            "product_count",
-            "subcategories",
-        ]
+        fields = ["id", "name", "slug", "product_count", "subcategories"]
 
 
 # =========================
@@ -55,13 +69,11 @@ class ProductVariantSerializer(serializers.ModelSerializer):
         ]
 
     def get_display_label(self, obj):
-        if obj.unit:
-            return f"{obj.quantity} {obj.unit}"
-        return obj.quantity
+        return f"{obj.quantity} {obj.unit}" if obj.unit else obj.quantity
 
 
 # =========================
-# PRODUCT SERIALIZER (🔥 FIXED)
+# PRODUCT SERIALIZER
 # =========================
 class ProductSerializer(serializers.ModelSerializer):
     variants = ProductVariantSerializer(many=True, read_only=True)
@@ -72,7 +84,6 @@ class ProductSerializer(serializers.ModelSerializer):
         source="subcategory.name", read_only=True
     )
 
-    # 🔥 CANONICAL PRODUCT CATALOG (DERIVED FROM VARIANTS)
     catalog_number = serializers.SerializerMethodField()
 
     class Meta:
@@ -81,7 +92,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "slug",
-            "catalog_number",   # ✅ ALWAYS PRESENT
+            "catalog_number",
             "description",
             "image",
             "category",
@@ -94,16 +105,10 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_catalog_number(self, obj):
         variants = obj.variants.all()
-
         if not variants.exists():
             return None
-
-        default_variant = variants.filter(is_default=True).first()
-        return (
-            default_variant.catalog_number
-            if default_variant
-            else variants.first().catalog_number
-        )
+        default = variants.filter(is_default=True).first()
+        return default.catalog_number if default else variants.first().catalog_number
 
 
 # =========================
@@ -112,14 +117,7 @@ class ProductSerializer(serializers.ModelSerializer):
 class TeamMemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeamMember
-        fields = [
-            "id",
-            "name",
-            "role",
-            "image",
-            "order",
-            "is_active",
-        ]
+        fields = ["id", "name", "role", "image", "order", "is_active"]
 
 
 # =========================
