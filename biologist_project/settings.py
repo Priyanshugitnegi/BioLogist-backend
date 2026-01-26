@@ -181,3 +181,15 @@ SIMPLE_JWT = {
 # RENDER HTTPS FIX
 # ──────────────────────────────────────
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
+# ──────────────────────────────────────
+# CACHING (to speed up products API)
+# ──────────────────────────────────────
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-cache",
+    }
+}
+

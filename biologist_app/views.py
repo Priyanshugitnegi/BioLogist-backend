@@ -8,6 +8,9 @@ from django.db.models import Count, Exists, OuterRef, Case, When, IntegerField
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.models import User
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+
 from .models import (
     Product,
     ProductVariant,
@@ -21,7 +24,7 @@ from .serializers import (
     TeamMemberSerializer,
     CategorySerializer,
     EnquirySerializer,
-    RegisterSerializer,   # ✅ ADD THIS
+    RegisterSerializer,
 )
 
 # =========================
@@ -37,12 +40,13 @@ def home(request, *args, **kwargs):
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
-    permission_classes = [permissions.AllowAny]   # 🔥 FIXES 403
+    permission_classes = [permissions.AllowAny]
 
 
 # =========================
 # PRODUCTS (LIST + DETAIL)
 # =========================
+@method_decorator(cache_page(60 * 10), name='list')   # ⭐ Cache list API for 10 min
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductSerializer
 
