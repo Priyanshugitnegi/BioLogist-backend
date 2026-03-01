@@ -99,11 +99,14 @@ if os.environ.get("DATABASE_URL"):
 else:
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "biologist_db_new",
+            "USER": "biologist_db_new_user",
+            "PASSWORD": "R4w6y1xX6Vd0FnpuXFYGwyNsHl2TjVxM",
+            "HOST": "dpg-d6hvehk50q8c73ar4rhg-a.oregon-postgres.render.com",
+            "PORT": "5432",
         }
     }
-
 # ──────────────────────────────────────
 # STATIC & MEDIA
 # ──────────────────────────────────────
