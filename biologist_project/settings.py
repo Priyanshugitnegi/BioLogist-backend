@@ -38,7 +38,7 @@ INSTALLED_APPS = [
 
     # Third-party
     "rest_framework",
-    "rest_framework.authtoken",   # ✅ added (safe & useful)
+    "rest_framework.authtoken",
     "django_filters",
     "corsheaders",
 
@@ -47,7 +47,7 @@ INSTALLED_APPS = [
 ]
 
 # ──────────────────────────────────────
-# MIDDLEWARE (ORDER MATTERS)
+# MIDDLEWARE
 # ──────────────────────────────────────
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -88,25 +88,14 @@ WSGI_APPLICATION = "biologist_project.wsgi.application"
 # ──────────────────────────────────────
 # DATABASE
 # ──────────────────────────────────────
-if os.environ.get("DATABASE_URL"):
-    DATABASES = {
-        "default": dj_database_url.parse(
-            os.environ["DATABASE_URL"],
-            conn_max_age=600,
-            ssl_require=True,
-        )
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": "biologist_db_new",
-            "USER": "biologist_db_new_user",
-            "PASSWORD": "R4w6y1xX6Vd0FnpuXFYGwyNsHl2TjVxM",
-            "HOST": "dpg-d6hvehk50q8c73ar4rhg-a.oregon-postgres.render.com",
-            "PORT": "5432",
-        }
-    }
+}
+    
+
 # ──────────────────────────────────────
 # STATIC & MEDIA
 # ──────────────────────────────────────
@@ -121,7 +110,7 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ──────────────────────────────────────
-# CORS (JWT + REACT SAFE)
+# CORS
 # ──────────────────────────────────────
 CORS_URLS_REGEX = r"^/api/.*$"
 
@@ -142,7 +131,7 @@ CORS_ALLOW_METHODS = [
 ]
 
 # ──────────────────────────────────────
-# CSRF (ONLY FOR ADMIN / FORMS)
+# CSRF
 # ──────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = [
     "https://bio-logist-frontend.vercel.app",
@@ -161,7 +150,7 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ──────────────────────────────────────
-# REST FRAMEWORK + JWT
+# REST FRAMEWORK
 # ──────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -174,6 +163,9 @@ REST_FRAMEWORK = {
     "PAGE_SIZE": 20,
 }
 
+# ──────────────────────────────────────
+# JWT
+# ──────────────────────────────────────
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
@@ -181,13 +173,12 @@ SIMPLE_JWT = {
 }
 
 # ──────────────────────────────────────
-# RENDER HTTPS FIX
+# HTTPS FIX
 # ──────────────────────────────────────
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-
 # ──────────────────────────────────────
-# CACHING (to speed up products API)
+# CACHE
 # ──────────────────────────────────────
 CACHES = {
     "default": {
@@ -195,4 +186,3 @@ CACHES = {
         "LOCATION": "unique-cache",
     }
 }
-
