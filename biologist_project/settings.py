@@ -20,7 +20,7 @@ ALLOWED_HOSTS = [
     "api.biologistinfo.com",
     "www.biologistinfo.com",
     "biologistinfo.com",
-    "biologist-backend-1.onrender.com",
+    "biologist-backend.onrender.com",
     "localhost",
     "127.0.0.1",
 ]
